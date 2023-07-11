@@ -43,7 +43,6 @@ def handle_client(conn,addr):
         file.write(data)
         conn.send("File data received".encode(FORMAT))
 
-        """ Closing the file. """
         file.close()
 
         act1_file_path=os.path.join("./", filename)
@@ -71,8 +70,7 @@ def handle_client(conn,addr):
         os.remove(dup1_file_path)
 
 
-    
-    """ Closing the connection from the client. """
+   
     conn.close()
     print(f"[DISCONNECTED] {addr} disconnected.")
 

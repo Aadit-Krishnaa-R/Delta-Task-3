@@ -9,13 +9,8 @@ FORMAT = "utf-8"
 SIZE = 1024000
 
 def main():
-    """ Staring a TCP socket. """
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    """ Connecting to the server. """
     client.connect(ADDR)
-
-    """ Opening and reading the file data. """
     ch=input("What do you want to do ? (upload/download)")
     client.send(ch.encode(FORMAT))
     msg1=client.recv(SIZE).decode(FORMAT)
@@ -27,8 +22,6 @@ def main():
         filepath=os.path.join("client_files", fname)
         file = open(filepath, "r")
         data = file.read()
-
-        """ Sending the filename to the server. """
         client.send(fname.encode(FORMAT))
         msg = client.recv(SIZE).decode(FORMAT)
         print(f"[SERVER]: {msg}")
@@ -38,7 +31,6 @@ def main():
         msg = client.recv(SIZE).decode(FORMAT)
         print(f"[SERVER]: {msg}")
 
-        """ Closing the file. """
         file.close()
     elif ch == "download":
         fname1=input("Enter the file that has to be extracted (zip format)")
@@ -61,7 +53,6 @@ def main():
         file2.close()
 
 
-    """ Closing the connection from the server. """
     client.close()
 
 
