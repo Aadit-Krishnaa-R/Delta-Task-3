@@ -41,6 +41,7 @@ def main():
                 print(f"[SERVER]: {msg}")
 
                 file.close()
+                client.close()
             elif ch == "download":
                 fname1=input("Enter the file that has to be extracted (zip format)")
                 """Sending the filename to server"""
@@ -60,6 +61,7 @@ def main():
                 file2.write(data)
                 client.send("FILE DATA RECIVED".encode(FORMAT))
                 file2.close()
+                client.close()
             elif ch == "quit":
                 break
             else:

@@ -6,10 +6,10 @@ services:
     volumes:
       - ./data/db:/root/db
     environment:
-      - SQLITE3_DB=userdata.db
+      - SQLITE3_DB=userdata1.db
   web:
     build: .
-    command: python3.9 server.py 
+    command: python3 server.py 
     ports:
       - "8000:8000"
     depends_on:
