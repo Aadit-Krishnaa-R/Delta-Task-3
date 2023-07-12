@@ -29,45 +29,48 @@ def file_decompress(filepath):
 
 def handle_client(conn,addr):
     print(f"[NEW CONNECTION] {addr} connected")
-    ch=conn.recv(SIZE).decode(FORMAT)
-    conn.send("Choice Recieved".encode(FORMAT))
-    if ch == "upload":
-        filename = conn.recv(SIZE).decode(FORMAT)
-        print(f"[RECV] Receiving the filename.")
-        file = open(filename, "w")
-        conn.send("Filename received.".encode(FORMAT))
+    while True:
+        ch=conn.recv(SIZE).decode(FORMAT)
+        conn.send("Choice Recieved".encode(FORMAT))
+        if ch == "upload":
+            filename = conn.recv(SIZE).decode(FORMAT)
+            # print(f"[RECV] Receiving the filename.")
+            file = open(filename, "w")
+            conn.send("Filename received.".encode(FORMAT))
 
-        """ Receiving the file data from the client. """
-        data = conn.recv(SIZE).decode(FORMAT)
-        print(f"[RECV] Receiving the file data.")
-        file.write(data)
-        conn.send("File data received".encode(FORMAT))
+            """ Receiving the file data from the client. """
+            data = conn.recv(SIZE).decode(FORMAT)
+            # print(f"[RECV] Receiving the file data.")
+            file.write(data)
+            conn.send("File data received".encode(FORMAT))
 
-        file.close()
+            file.close()
 
-        act1_file_path=os.path.join("./", filename)
-        file_compress(act1_file_path)
-        os.remove(act1_file_path)
-    
-    elif ch == "download":
-        filename1=conn.recv(SIZE).decode(FORMAT)
-        act_file_path=os.path.join("server_files/", filename1)
-        conn.send("Filename recieved".encode(FORMAT))
-        decomp_file=file_decompress(act_file_path)
-        """Sending the name """
-        conn.send(decomp_file.encode(FORMAT))
-        msg1=conn.recv(SIZE).decode(FORMAT)
-        print(f"[CLIENT]: {msg1}")
+            act1_file_path=os.path.join("./", filename)
+            file_compress(act1_file_path)
+            os.remove(act1_file_path)
+        
+        elif ch == "download":
+            filename1=conn.recv(SIZE).decode(FORMAT)
+            act_file_path=os.path.join("server_files/", filename1)
+            conn.send("Filename recieved".encode(FORMAT))
+            decomp_file=file_decompress(act_file_path)
+            """Sending the name """
+            conn.send(decomp_file.encode(FORMAT))
+            msg1=conn.recv(SIZE).decode(FORMAT)
+            # print(f"[CLIENT]: {msg1}")
 
-        file1=open(decomp_file, "r")
-        data1=file1.read()
+            file1=open(decomp_file, "r")
+            data1=file1.read()
 
-        conn.send(data1.encode(FORMAT))
-        msg = conn.recv(SIZE).decode(FORMAT)
-        print(f"[CLIENT]: {msg}")
-        file1.close()
-        dup1_file_path=os.path.join("./", decomp_file)
-        os.remove(dup1_file_path)
+            conn.send(data1.encode(FORMAT))
+            msg = conn.recv(SIZE).decode(FORMAT)
+            # print(f"[CLIENT]: {msg}")
+            file1.close()
+            dup1_file_path=os.path.join("./", decomp_file)
+            os.remove(dup1_file_path)
+        elif ch == "quit":
+            break
 
 
    
