@@ -2,6 +2,8 @@ import socket
 import threading
 import shutil
 import os
+import hashlib
+import sqlite3
 from zipfile import ZipFile
 SIZE = 1024000
 FORMAT = "utf-8"
@@ -30,57 +32,68 @@ def file_decompress(filepath):
 def handle_client(conn,addr):
     print(f"[NEW CONNECTION] {addr} connected")
     while True:
-        ch=conn.recv(SIZE).decode(FORMAT)
-        conn.send("Choice Recieved".encode(FORMAT))
-        if ch == "upload":
-            filename = conn.recv(SIZE).decode(FORMAT)
-            # print(f"[RECV] Receiving the filename.")
-            file = open(filename, "w")
-            conn.send("Filename received.".encode(FORMAT))
+        conn.send("Username:".encode(FORMAT))
+        username=conn.recv(SIZE).decode(FORMAT)
+        conn.send("Password:".encode(FORMAT))
+        password=conn.recv(SIZE)
+        password=hashlib.sha256(password).hexdigest()
 
-            """ Receiving the file data from the client. """
-            data = conn.recv(SIZE).decode(FORMAT)
-            # print(f"[RECV] Receiving the file data.")
-            file.write(data)
-            conn.send("File data received".encode(FORMAT))
+        c=sqlite3.connect("userdata1.db")
+        cur=c.cursor()
+        cur.execute("SELECT * FROM userdata WHERE username = ? AND password = ?",(username, password))
 
-            file.close()
+        if cur.fetchall():
+            conn.send("LOGIN SUCCESSFULL".encode(FORMAT))
+            ch=conn.recv(SIZE).decode(FORMAT)
+            conn.send("Choice Recieved".encode(FORMAT))
+            if ch == "upload":
+                filename = conn.recv(SIZE).decode(FORMAT)
+                # print(f"[RECV] Receiving the filename.")
+                file = open(filename, "w")
+                conn.send("Filename received.".encode(FORMAT))
 
-            act1_file_path=os.path.join("./", filename)
-            file_compress(act1_file_path)
-            os.remove(act1_file_path)
-        
-        elif ch == "download":
-            filename1=conn.recv(SIZE).decode(FORMAT)
-            act_file_path=os.path.join("server_files/", filename1)
-            conn.send("Filename recieved".encode(FORMAT))
-            decomp_file=file_decompress(act_file_path)
-            """Sending the name """
-            conn.send(decomp_file.encode(FORMAT))
-            msg1=conn.recv(SIZE).decode(FORMAT)
-            # print(f"[CLIENT]: {msg1}")
+                """ Receiving the file data from the client. """
+                data = conn.recv(SIZE).decode(FORMAT)
+                # print(f"[RECV] Receiving the file data.")
+                file.write(data)
+                conn.send("File data received".encode(FORMAT))
 
-            file1=open(decomp_file, "r")
-            data1=file1.read()
+                file.close()
 
-            conn.send(data1.encode(FORMAT))
-            msg = conn.recv(SIZE).decode(FORMAT)
-            # print(f"[CLIENT]: {msg}")
-            file1.close()
-            dup1_file_path=os.path.join("./", decomp_file)
-            os.remove(dup1_file_path)
-        elif ch == "quit":
-            break
+                act1_file_path=os.path.join("./", filename)
+                file_compress(act1_file_path)
+                os.remove(act1_file_path)
+            
+            elif ch == "download":
+                filename1=conn.recv(SIZE).decode(FORMAT)
+                act_file_path=os.path.join("server_files/", filename1)
+                conn.send("Filename recieved".encode(FORMAT))
+                decomp_file=file_decompress(act_file_path)
+                """Sending the name """
+                conn.send(decomp_file.encode(FORMAT))
+                msg1=conn.recv(SIZE).decode(FORMAT)
+                # print(f"[CLIENT]: {msg1}")
 
+                file1=open(decomp_file, "r")
+                data1=file1.read()
 
-   
+                conn.send(data1.encode(FORMAT))
+                msg = conn.recv(SIZE).decode(FORMAT)
+                # print(f"[CLIENT]: {msg}")
+                file1.close()
+                dup1_file_path=os.path.join("./", decomp_file)
+                os.remove(dup1_file_path)
+            else:
+                break
+        else:
+            conn.send("LOGIN FAILED".encode(FORMAT))
     conn.close()
     print(f"[DISCONNECTED] {addr} disconnected.")
 
 def main():
     print("[STARTING] server is starting ...")
     host = socket.gethostbyname(socket.gethostname())
-    port = 4457
+    port = 9990
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     s.bind((host,port))
     s.listen()
