@@ -1,6 +1,11 @@
 import socket
 import os
 import shutil
+from Crypto.Cipher import AES
+key=b"ThisIsAaditForU."
+nonce=b"ThatWasAaditForU"
+
+cipher=AES.new(key, AES.MODE_EAX, nonce)
 
 IP = socket.gethostbyname(socket.gethostname())
 PORT = 9991
@@ -29,14 +34,15 @@ def main():
                 print(os.listdir('client_files/'))
                 fname=input("Enter the file Name")
                 filepath=os.path.join("client_files", fname)
-                file = open(filepath, "r")
+                file = open(filepath, "rb")
                 data = file.read()
                 client.send(fname.encode(FORMAT))
                 msg = client.recv(SIZE).decode(FORMAT)
                 print(f"[SERVER]: {msg}")
 
                 """ Sending the file data to the server. """
-                client.send(data.encode(FORMAT))
+                encrypted=cipher.encrypt(data)
+                client.send(encrypted)
                 msg = client.recv(SIZE).decode(FORMAT)
                 print(f"[SERVER]: {msg}")
 
@@ -52,13 +58,13 @@ def main():
                 filename1=client.recv(SIZE).decode(FORMAT)
                 client.send("Decompressed file name received".encode(FORMAT))
 
-                print(filename1)
+                # print(filename1)
 
                 act2_file_path=os.path.join("client_files", filename1)
-                file2 = open(act2_file_path, "w")
+                file2 = open(act2_file_path, "wb")
 
-                data = client.recv(SIZE).decode(FORMAT)
-                file2.write(data)
+                data = client.recv(SIZE)
+                file2.write(cipher.decrypt(data))
                 client.send("FILE DATA RECIVED".encode(FORMAT))
                 file2.close()
                 break

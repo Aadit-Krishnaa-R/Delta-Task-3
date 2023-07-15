@@ -5,8 +5,16 @@ import os
 import hashlib
 import sqlite3
 from zipfile import ZipFile
+from Crypto.Cipher import AES
 SIZE = 1024000
 FORMAT = "utf-8"
+key=b"ThisIsAaditForU."
+nonce=b"ThatWasAaditForU"
+
+cipher=AES.new(key, AES.MODE_EAX, nonce)
+
+
+
 def file_compress(filepath):
     filename=os.path.basename(filepath)
     base_name, _=os.path.splitext(filename)
@@ -48,13 +56,13 @@ def handle_client(conn,addr):
             if ch == "upload":
                 filename = conn.recv(SIZE).decode(FORMAT)
                 # print(f"[RECV] Receiving the filename.")
-                file = open(filename, "w")
+                file = open(filename, "wb")
                 conn.send("Filename received.".encode(FORMAT))
 
                 """ Receiving the file data from the client. """
-                data = conn.recv(SIZE).decode(FORMAT)
+                data = conn.recv(SIZE)
                 # print(f"[RECV] Receiving the file data.")
-                file.write(data)
+                file.write(cipher.decrypt(data))
                 conn.send("File data received".encode(FORMAT))
 
                 file.close()
@@ -72,12 +80,14 @@ def handle_client(conn,addr):
                 """Sending the name """
                 conn.send(decomp_file.encode(FORMAT))
                 msg1=conn.recv(SIZE).decode(FORMAT)
-                # print(f"[CLIENT]: {msg1}")
+                print(f"[CLIENT]: {msg1}")
 
-                file1=open(decomp_file, "r")
+                file1=open(decomp_file, "rb")
                 data1=file1.read()
 
-                conn.send(data1.encode(FORMAT))
+                encrypted1=cipher.encrypt(data1)
+
+                conn.send(encrypted1)
                 msg = conn.recv(SIZE).decode(FORMAT)
                 # print(f"[CLIENT]: {msg}")
                 file1.close()
