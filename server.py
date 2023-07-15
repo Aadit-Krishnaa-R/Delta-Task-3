@@ -23,6 +23,7 @@ def file_compress(filepath):
     f.write(filepath)
     f.close()
     shutil.move(zip_name, 'server_files/')
+    return zip_name
 
 
 def file_decompress(filepath):
@@ -68,8 +69,9 @@ def handle_client(conn,addr):
                 file.close()
 
                 act1_file_path=os.path.join("./", filename)
-                file_compress(act1_file_path)
+                zipname=file_compress(act1_file_path)
                 os.remove(act1_file_path)
+                conn.send(zipname.encode(FORMAT))
                 break
             
             elif ch == "download":
@@ -77,6 +79,7 @@ def handle_client(conn,addr):
                 act_file_path=os.path.join("server_files/", filename1)
                 conn.send("Filename recieved".encode(FORMAT))
                 decomp_file=file_decompress(act_file_path)
+                os.remove(act_file_path)
                 """Sending the name """
                 conn.send(decomp_file.encode(FORMAT))
                 msg1=conn.recv(SIZE).decode(FORMAT)

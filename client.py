@@ -45,8 +45,10 @@ def main():
                 client.send(encrypted)
                 msg = client.recv(SIZE).decode(FORMAT)
                 print(f"[SERVER]: {msg}")
-
+                msg = client.recv(SIZE).decode(FORMAT)
+                print(f"[SERVER]: File stored as {msg}")
                 file.close()
+                os.remove(filepath)
                 break
             elif ch == "download":
                 fname1=input("Enter the file that has to be extracted (zip format)")
