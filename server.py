@@ -7,7 +7,6 @@ import sqlite3
 from zipfile import ZipFile
 SIZE = 1024000
 FORMAT = "utf-8"
-
 def file_compress(filepath):
     filename=os.path.basename(filepath)
     base_name, _=os.path.splitext(filename)
@@ -63,6 +62,7 @@ def handle_client(conn,addr):
                 act1_file_path=os.path.join("./", filename)
                 file_compress(act1_file_path)
                 os.remove(act1_file_path)
+                break
             
             elif ch == "download":
                 filename1=conn.recv(SIZE).decode(FORMAT)
@@ -83,17 +83,19 @@ def handle_client(conn,addr):
                 file1.close()
                 dup1_file_path=os.path.join("./", decomp_file)
                 os.remove(dup1_file_path)
+                break
             else:
                 break
         else:
             conn.send("LOGIN FAILED".encode(FORMAT))
+            break
     conn.close()
     print(f"[DISCONNECTED] {addr} disconnected.")
 
 def main():
     print("[STARTING] server is starting ...")
     host = socket.gethostbyname(socket.gethostname())
-    port = 9990
+    port = 9991
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     s.bind((host,port))
     s.listen()

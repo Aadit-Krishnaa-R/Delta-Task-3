@@ -3,7 +3,7 @@ import os
 import shutil
 
 IP = socket.gethostbyname(socket.gethostname())
-PORT = 9990
+PORT = 9991
 ADDR = (IP, PORT)
 FORMAT = "utf-8"
 SIZE = 1024000
@@ -41,7 +41,7 @@ def main():
                 print(f"[SERVER]: {msg}")
 
                 file.close()
-                client.close()
+                break
             elif ch == "download":
                 fname1=input("Enter the file that has to be extracted (zip format)")
                 """Sending the filename to server"""
@@ -61,7 +61,7 @@ def main():
                 file2.write(data)
                 client.send("FILE DATA RECIVED".encode(FORMAT))
                 file2.close()
-                client.close()
+                break
             elif ch == "quit":
                 break
             else:
