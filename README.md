@@ -1,7 +1,7 @@
 # FILE ARCHIVAL SERVER
 
 
-> Starting of, git clone my repo
+> Starting off, git clone my repo
 >
 >> git clone https://github.com/Aadit-Krishnaa-R/Delta-Task-3
 
