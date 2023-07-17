@@ -3,7 +3,7 @@
 
 > Starting off, git clone my repo
 >
->> git clone https://github.com/Aadit-Krishnaa-R/Delta-Task-3
+>> git clone https://github.com/Aadit-Krishnaa-R/Delta-Task-3.git
 
 ### Run the db script
 ```
